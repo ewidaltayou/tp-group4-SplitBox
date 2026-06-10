@@ -190,10 +190,24 @@ form {
   gap: 10px;
 }
 
+
+
 form input,
-form select,
-form button {
+form select {
   width: 100%;
   padding: 10px;
   box-sizing: border-box;
+}
+
+form button{
+  padding: 10px;
+  background-color: #1363f8;
+  border-radius: 5%;
+}
+
+
+.hist{
+
+  border: 10px solid #0004;
+
 }

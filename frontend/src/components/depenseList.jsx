@@ -10,9 +10,9 @@ function DepenseList({ depenses }) {
       <h2>Historique des dépenses</h2>
 
       {depenses.map((depense, index) => (
-        <div key={index}>
+        <div key={index} className="hist">
 
-          <h3>{depense.titre}</h3>
+          <h3>{depense.libelle}</h3>
 
           <p>
             Montant : {depense.montant} FCFA

@@ -5,7 +5,7 @@ function DepenseForm({
   membres,
   ajouterDepense
 }) {
-  const [titre, setTitre] = useState("");
+  const [libelle, setLibelle] = useState("");
   const [montant, setMontant] = useState("");
   const [payePar, setPayePar] = useState("");
 
@@ -13,13 +13,13 @@ function DepenseForm({
     e.preventDefault();
 
     ajouterDepense({
-      titre,
+      libelle,
       montant: Number(montant),
       payePar,
       groupId
     });
 
-    setTitre("");
+    setLibelle("");
     setMontant("");
     setPayePar("");
   };
@@ -29,9 +29,9 @@ function DepenseForm({
 
       <input
         type="text"
-        placeholder="Titre"
-        value={titre}
-        onChange={(e) => setTitre(e.target.value)}
+        placeholder="Libelle"
+        value={libelle}
+        onChange={(e) => setLibelle(e.target.value)}
         required
       />
 
@@ -49,7 +49,7 @@ function DepenseForm({
         required
       >
         <option value="">
-          Choisir un membre
+          Payer par:
         </option>
 
         {membres.map((membre) => (
