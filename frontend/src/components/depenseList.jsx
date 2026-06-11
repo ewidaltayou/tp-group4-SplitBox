@@ -1,3 +1,4 @@
+
 function DepenseList({ depenses }) {
 
   if (depenses.length === 0) {
@@ -30,3 +31,4 @@ function DepenseList({ depenses }) {
 }
 
 export default DepenseList;
+
