@@ -1,214 +1,207 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getGroups, createGroup } from "../services/api";
-import charingImage from "../assets/charing.jpeg";
-import logoIcon from "../assets/png.jpeg";
 import "./Home.css";
 
-const STORAGE_KEY = "splitbox_home_groups";
-
 function Home() {
-  const [groupes, setGroupes] = useState([]);
-  const [nouveauGroupe, setNouveauGroupe] = useState({
-    nom: "",
-    membres: [],
-  });
-  const [membreNom, setMembreNom] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const normalizeGroup = (group) => ({
-    id: group._id || group.id || Date.now(),
-    nom: group.name || group.nom || "",
-    membres:
-      group.members?.map((member) => ({ nom: member })) ||
-      group.membres ||
-      [],
-  });
+  const navigate = useNavigate();
+  const [groups, setGroups] = useState([]);
+  const [newGroup, setNewGroup] = useState("");
+  const [members, setMembers] = useState([""]);
 
   useEffect(() => {
-    setLoading(true);
-    const savedGroups = (() => {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-      } catch (e) {
-        return [];
-      }
-    })();
+    document.title = "SplitBox — Accueil";
 
-    getGroups()
-      .then((response) => {
-        const fetched = Array.isArray(response.data)
-          ? response.data.map(normalizeGroup)
-          : [];
-        const merged = [
-          ...fetched,
-          ...savedGroups.filter((localGroup) =>
-            !fetched.some((fetchedGroup) => fetchedGroup.id === localGroup.id)
-          ),
-        ];
-        setGroupes(merged);
-        setError("");
-      })
-      .catch(() => {
-        setGroupes(savedGroups);
-        setError("Impossible de charger les groupes depuis le backend. affichage local activé.");
-      })
-      .finally(() => setLoading(false));
+    fetch("http://localhost:5000/api/groups")
+      .then((response) => response.json())
+      .then((data) => setGroups(data || []))
+      .catch((error) => {
+        console.error("Erreur chargement groupes :", error);
+      });
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(groupes));
-  }, [groupes]);
+  const handleAddGroup = async (event) => {
+    event.preventDefault();
+    if (!newGroup.trim()) {
+      return;
+    }
 
-  const ajouterMembre = () => {
-    const nom = membreNom.trim();
-    if (!nom) return;
-
-    setNouveauGroupe((prev) => ({
-      ...prev,
-      membres: [...prev.membres, { nom }],
-    }));
-    setMembreNom("");
-  };
-
-  const ajouterGroupe = () => {
-    if (!nouveauGroupe.nom) return;
-
-    const payload = {
-      name: nouveauGroupe.nom,
-      members: nouveauGroupe.membres.map((m) => m.nom),
+    const filteredMembers = members.filter((member) => member.trim() !== "");
+    const tempId = `temp-${Date.now()}`;
+    const nextGroup = {
+      id: tempId,
+      _id: tempId,
+      title: newGroup.trim(),
+      members: filteredMembers,
+      description:
+        filteredMembers.length > 0
+          ? `Membres : ${filteredMembers.join(", ")}`
+          : "Cliquez pour voir votre tableau de bord",
+      saving: true
     };
 
-    setLoading(true);
-    createGroup(payload)
-      .then((response) => {
-        const created = normalizeGroup(response.data);
-        setGroupes((prev) => [...prev, created]);
-        setNouveauGroupe({ nom: "", membres: [] });
-        setMembreNom("");
-        setError("");
-      })
-      .catch(() => {
-        const fallbackGroup = {
-          id: Date.now(),
-          nom: nouveauGroupe.nom,
-          membres: [...nouveauGroupe.membres],
-        };
-        setGroupes((prev) => [...prev, fallbackGroup]);
-        setNouveauGroupe({ nom: "", membres: [] });
-        setMembreNom("");
-        setError("Impossible de créer le groupe sur le backend. Il est ajouté localement.");
-      })
-      .finally(() => setLoading(false));
+    setGroups((current) => [nextGroup, ...current]);
+    setNewGroup("");
+    setMembers([""]);
+
+    const body = {
+      name: nextGroup.title,
+      members: nextGroup.members
+    };
+
+    try {
+      const response = await fetch("http://localhost:5000/api/groups", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        throw new Error("Impossible d'ajouter le groupe");
+      }
+
+      const group = await response.json();
+      const savedGroup = {
+        _id: group._id,
+        title: group.name,
+        members: group.members,
+        description:
+          group.members.length > 0
+            ? `Membres : ${group.members.join(", ")}`
+            : "Cliquez pour voir votre tableau de bord"
+      };
+
+      setGroups((current) =>
+        current.map((item) =>
+          item.id === tempId || item._id === tempId ? savedGroup : item
+        )
+      );
+    } catch (error) {
+      setGroups((current) =>
+        current.map((item) =>
+          item.id === tempId || item._id === tempId
+            ? { ...item, saving: false, saveFailed: true }
+            : item
+        )
+      );
+      console.error(error);
+    }
   };
 
-  const navigate = useNavigate();
+  const addMemberField = () => {
+    setMembers((current) => [...current, ""]);
+  };
 
-  const supprimerGroupe = (id) => {
-    setGroupes(groupes.filter((g) => g.id !== id));
+  const handleMemberChange = (index, value) => {
+    setMembers((current) =>
+      current.map((member, memberIndex) =>
+        memberIndex === index ? value : member
+      )
+    );
   };
 
   return (
-    <div className="page-homme">
-
-      <div className="header">
-        <div className="logo">
-          <img src={logoIcon} alt="SplitBox logo" />
-        </div>
-        <h2>SplitBox</h2>
-      </div>
-
-      <section className="hero">
-        <div className="hero-text">
+    <main className="home-page">
+      <section className="hero-section">
+        <div className="hero-copy">
+          <span className="brand-name">SplitBox</span>
           <h1>Gérez les dépenses de groupe sans complications</h1>
-
           <p>
-            SplitBox centralise toutes vos dépenses partagées
-            et calcule automatiquement qui doit à qui.
+            SplitBox centralise toutes vos dépenses partagées et calcule
+            automatiquement qui doit quoi. Simplifiez la gestion financière de
+            votre groupe en quelques clics.
           </p>
-
-          <button className="btn-start"  >
-            Commencer →
+          <button type="button" className="hero-button">
+            Commencer <span aria-hidden="true">→</span>
           </button>
         </div>
 
-        <div className="hero-image">
-          <img src={charingImage} alt="Illustration SplitBox" />
-        </div>
-      </section>
-      <section className="contenu">
-        <div className="status-bar">
-          {loading && <div className="status-message">Chargement en cours...</div>}
-          {error && <div className="error-message">{error}</div>}
-        </div>
-
-        <div className="groupes">
-          {groupes.length === 0 && !loading && (
-            <div className="empty-message">Aucun groupe trouvé.</div>
-          )}
-
-          {groupes.map((groupe) => (
-            <div key={groupe.id} className="carte-groupe">
-              <h3>{groupe.nom}</h3>
-
-              <ul>
-                {groupe.membres.map((membre, index) => (
-                  <li key={index}>{membre.nom || membre}</li>
-                ))}
-              </ul>
-
-              <button onClick={() => navigate(`/${groupe.id}`)}>
-                voir groupe
-              </button>
+        <div className="hero-visual">
+          <div className="hero-visual-card">
+            <div className="hero-visual-icon">📚</div>
+            <div className="hero-visual-text">
+              Votre gestion de groupe claire et rapide
             </div>
-          ))}
-        </div>
-
-        <div className="creation">
-          <h2>Créer un groupe</h2>
-
-          <input
-            type="text"
-            placeholder="Nom du groupe"
-            value={nouveauGroupe.nom}
-            onChange={(e) =>
-              setNouveauGroupe((prev) => ({ ...prev, nom: e.target.value }))
-            }
-          />
-
-          <input
-            type="text"
-            placeholder="Nom du membre"
-            value={membreNom}
-            onChange={(e) => setMembreNom(e.target.value)}
-          />
-
-          <button type="button" onClick={ajouterMembre}>
-            Ajouter un membre
-          </button>
-
-          {nouveauGroupe.membres.length > 0 && (
-            <div style={{ marginTop: 12 }}>
-              <strong>Membres ajoutés:</strong>
-              <ul>
-                {nouveauGroupe.membres.map((membre, index) => (
-                  <li key={index}>{membre.nom}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          <div>
-            <button className="btn-start" onClick={ajouterGroupe}>
-              Créer
-            </button>
           </div>
         </div>
-          
       </section>
 
-    </div>
+      <section className="content-grid">
+        <div className="groups-column">
+          <div className="groups-header">
+            <h2>Groupes</h2>
+          </div>
+          {groups.map((group) => {
+            const groupId = group._id || group.id;
+            const title = group.title || group.name || "Groupe";
+            const membersList = group.members || [];
+            const description =
+              group.description ||
+              (membersList.length > 0
+                ? `Membres : ${membersList.join(", ")}`
+                : "Cliquez pour voir votre tableau de bord");
+
+            return (
+              <article
+                key={groupId}
+                className="group-card group-card-clickable"
+                onClick={() => navigate(`/${groupId}`, { state: { group } })}
+              >
+                <div className="group-card-title">{title}</div>
+                <div className="group-card-description">{description}</div>
+                {group.saving && <div className="saving-label">Enregistrement en cours...</div>}
+                {group.saveFailed && <div className="error-label">Échec de l'enregistrement</div>}
+              </article>
+            );
+          })}
+        </div>
+
+        <aside className="group-form-panel">
+          <form className="group-form" onSubmit={handleAddGroup}>
+            <div className="form-field">
+              <label htmlFor="group-name">Nom du groupe :</label>
+              <input
+                id="group-name"
+                value={newGroup}
+                onChange={(event) => setNewGroup(event.target.value)}
+                placeholder="Nom du groupe"
+              />
+            </div>
+            {members.map((member, index) => (
+              <div className="form-field member-field" key={index}>
+                <div>
+                  <label htmlFor={`member-name-${index}`}>
+                    Membre {index + 1} :
+                  </label>
+                  <input
+                    id={`member-name-${index}`}
+                    value={member}
+                    onChange={(event) =>
+                      handleMemberChange(index, event.target.value)
+                    }
+                    placeholder="Nom du membre"
+                  />
+                </div>
+                {index === members.length - 1 && (
+                  <button
+                    type="button"
+                    className="member-add-button"
+                    aria-label="Ajouter un membre"
+                    onClick={addMemberField}
+                  >
+                    +
+                  </button>
+                )}
+              </div>
+            ))}
+            <button type="submit" className="submit-button" disabled={!newGroup.trim()}>
+              Ajouter
+            </button>
+          </form>
+        </aside>
+      </section>
+    </main>
   );
 }
 
