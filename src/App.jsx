@@ -1,4 +1,4 @@
-import Homme from "./pages/Homme";
+import Homme from "./pages/home";
 
 function App() {
   return <Homme />;

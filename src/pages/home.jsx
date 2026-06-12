@@ -7,7 +7,7 @@ import { FaPlus } from "react-icons/fa";       // Ajouter
 import { FaTrash } from "react-icons/fa";      // Supprimer
 import { FaHome } from "react-icons/fa";       // Accueil
 import { FaUserFriends } from "react-icons/fa"; // Membres
-import "./Homme.css";
+import "./Home.css";
 
 
 function Homme() {
