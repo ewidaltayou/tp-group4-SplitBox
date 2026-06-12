@@ -79,10 +79,8 @@ function Homme() {
       <img src={heroImg} alt="Illustration" />
         </div>
       </section>
-
       <section className="contenu">
-
-        <div className="groupes">
+         <div className="groupes">
           {groupes.map((groupe) => (
             <div key={groupe.id} className="carte-groupe">
               <h3>

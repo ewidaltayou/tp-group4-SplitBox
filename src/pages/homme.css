@@ -15,7 +15,7 @@
 .logo {
   width: 60px;
   height: 60px;
-  background: #d9d9d9;
+  background: #c1c1c1;
 }
 
 .hero {
@@ -32,7 +32,7 @@
 
 .hero-text p {
   font-size: 20px;
-  color: #555;
+  color: #0b0a0a;
   line-height: 1.6;
 }
 
@@ -41,15 +41,16 @@
   padding: 12px 25px;
   border: none;
   background: #111827;
-  color: white;
+  color: rgb(247, 247, 247);
   cursor: pointer;
   border-radius: 8px;
 }
 
 .hero-image {
-  background: #ddd;
+  background: #dfdfdf;
   height: 320px;
   border-radius: 15px;
+  
 }
 
 .contenu {
@@ -65,14 +66,14 @@
 }
 
 .carte-groupe {
-  background: white;
+  background: rgb(254, 253, 253);
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.08);
 }
 
 .creation {
-  background: white;
+  background: rgb(224, 224, 224);
   padding: 25px;
   border-radius: 12px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.08);
@@ -82,7 +83,7 @@
   width: 100%;
   padding: 12px;
   margin-bottom: 15px;
-  border: 1px solid #ccc;
+  border: 1px solid #151414;
   border-radius: 8px;
 }
 
@@ -90,7 +91,7 @@
   width: 100%;
   padding: 12px;
   background: #2563eb;
-  color: white;
+  color: rgb(23, 22, 22);
   border: none;
   border-radius: 8px;
   cursor: pointer;
