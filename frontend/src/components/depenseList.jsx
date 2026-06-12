@@ -1,31 +1,31 @@
 
 function DepenseList({ depenses }) {
 
-  if (depenses.length === 0) {
+  if (!depenses || depenses.length === 0) {
     return <p>Aucune dépense enregistrée.</p>;
   }
 
   return (
-    <div>
-
+    <div className="depense-list">
       <h2>Historique des dépenses</h2>
-
-      {depenses.map((depense, index) => (
-        <div key={index} className="hist">
-
-          <h3>{depense.libelle}</h3>
-
-          <p>
-            Montant : {depense.montant} FCFA
-          </p>
-
-          <p>
-            Payé par : {depense.payePar}
-          </p>
-
-        </div>
-      ))}
-
+      <table>
+        <thead>
+          <tr>
+            <th>Libellé</th>
+            <th>Montant (FCFA)</th>
+            <th>Payé par</th>
+          </tr>
+        </thead>
+        <tbody>
+          {depenses.map((depense, index) => (
+            <tr key={index}>
+              <td>{depense.libelle}</td>
+              <td>{depense.montant}</td>
+              <td>{depense.payePar}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

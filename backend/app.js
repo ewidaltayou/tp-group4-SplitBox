@@ -7,12 +7,12 @@ import balanceRoutes from "./routes/balanceRoutes.js";
 
 
 const app = express();
-app.use("/api/groups", balanceRoutes);
 app.use(cors());
 
 app.use(express.json());
 
 app.use("/api/groups", groupRoutes);
-app.use("/api/groups", expenseRoutes);
+app.use("/api/expenses", expenseRoutes);
+app.use("/api/balances", balanceRoutes);
 
 export default app;

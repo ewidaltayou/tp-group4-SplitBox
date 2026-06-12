@@ -109,3 +109,33 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* Placeholder couleur noire */
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+  color: #000;
+  opacity: 1;
+}
+
+/* Vendor prefixes */
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  color: #000;
+}
+
+input:-ms-input-placeholder,
+textarea:-ms-input-placeholder {
+  color: #000;
+}
+
+input::-ms-input-placeholder,
+textarea::-ms-input-placeholder {
+  color: #000;
+}
+
+input::-moz-placeholder,
+textarea::-moz-placeholder {
+  color: #000;
+  opacity: 1;
+}
